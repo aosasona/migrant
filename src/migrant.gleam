@@ -1,22 +1,18 @@
 import gleam/io
-import gleam/map
 import migrant/filesystem
+import migrant/database
+import migrant/types.{Error}
 import sqlight
 
-pub fn migrate(_: sqlight.Connection, migration_dir: String) {
-  let migrations = case filesystem.load_migration_files(migration_dir) {
-    Ok(migrations) -> migrations
-    Error(e) -> {
-      io.debug(e)
-      panic as "Failed to load migrations"
-    }
-  }
+pub fn migrate(
+  db: sqlight.Connection,
+  migration_dir: String,
+) -> Result(Nil, Error) {
+  use <- database.create_migrations_table(db)
+  use migrations <- filesystem.load_migration_files(migration_dir)
+  use migrations <- database.filter_applied_migrations(db, migrations)
 
-  io.print("Migrations found:")
-  io.debug(
-    migrations
-    |> map.to_list,
-  )
+  io.debug(migrations)
 
-  Nil
+  Ok(Nil)
 }

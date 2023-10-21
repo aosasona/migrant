@@ -1,12 +1,14 @@
 import gleam/map.{Map}
 import gleam/option.{Option}
 import simplifile
+import sqlight
 
-pub type MigrationError {
+pub type Error {
   ExpectedFolderError
   FileError(simplifile.FileError)
   FilenameError(message: String)
   ExtractionError(message: String)
+  DatabaseError(sqlight.Error)
 }
 
 pub type Migration {
