@@ -4,7 +4,7 @@ Database migrations for SQLite in Gleam
 
 ## Usage
 
-```rust
+```gleam
 import gleam/erlang
 import app/database
 import migrant
@@ -29,6 +29,14 @@ If you want to use it regardless, you can install it as a local dependency by cl
 ```toml
 [dependencies]
 migrant = { path = "path/to/migrant" }
+```
+
+### Installing Alpha from Hex
+
+Again, this has not been thoroughly tested, it has been built to suit what I need at the moment, use at your own risk.
+
+```sh
+gleam add migrant
 ```
 
 ## Targets
