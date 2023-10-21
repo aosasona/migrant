@@ -2,6 +2,23 @@
 
 Database migrations for SQLite in Gleam
 
+## Usage
+
+```rust
+import gleam/erlang
+import app/database
+import migrant
+
+pub fn main() {
+  let db = database.connect()
+
+  let assert Ok(priv_directory) = erlang.priv_directory("app")
+  let assert Ok(_) = migrant.migrate(db, priv_directory <> "/migrations")
+
+  Nil
+}
+```
+
 ## Installation
 
 This library is currently being developed as it is used in projects & as needed, there are no stable (or really any) releases yet and there won't be for a while.
