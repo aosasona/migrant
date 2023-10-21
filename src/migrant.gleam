@@ -12,7 +12,11 @@ pub fn migrate(
   use migrations <- filesystem.load_migration_files(migration_dir)
   use migrations <- database.filter_applied_migrations(db, migrations)
 
-  io.debug(migrations)
-
-  Ok(Nil)
+  case database.apply_migrations(db, migrations) {
+    Ok(_) -> Ok(Nil)
+    Error(err) -> {
+      io.debug(err)
+      panic as "Something went horribly wrong, see above for details."
+    }
+  }
 }

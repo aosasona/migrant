@@ -1,3 +1,4 @@
+import gleam/io
 import gleam/string
 import gleam/map
 import gleam/option.{None, Option, Some}
@@ -11,6 +12,7 @@ pub fn load_migration_files(
   migrations_dir: String,
   next: fn(Migrations) -> Result(Nil, Error),
 ) -> Result(Nil, Error) {
+  io.println("-> Loading migrations from " <> migrations_dir)
   use migrations_dir <- is_directory(migrations_dir)
   use files <- list_files(migrations_dir)
 
