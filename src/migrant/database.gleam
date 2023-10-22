@@ -114,8 +114,6 @@ pub fn apply_migrations(
     }
     Error(e) -> Error(e)
   }
-
-  Ok(Nil)
 }
 
 fn run_migration(
@@ -144,21 +142,30 @@ fn apply(migration_tuple: #(String, Migration), db: sqlight.Connection) {
           case mark_migration_as_applied(db, migration_tuple) {
             Ok(_) -> Ok(Nil)
             Error(e) -> {
+              io.println("-> Failed to mark migration as applied: " <> name)
+              io.debug(e)
               io.println("-> Rolling back migration: " <> name)
+
               case rollback(migration_tuple, db) {
                 Ok(_) ->
                   Error(MigrationError(
                     "Rollback complete, failed to mark migration as applied: " <> name,
                     e,
                   ))
-                Error(e) -> Error(e)
+                Error(e) -> {
+                  io.println("-> Failed to rollback migration: " <> name)
+                  Error(e)
+                }
               }
             }
           }
           Ok(Nil)
         }
         Error(e) -> {
+          io.println("-> Failed to apply migration: " <> name)
+          io.debug(e)
           io.println("-> Rolling back migration: " <> name)
+
           case rollback(migration_tuple, db) {
             Ok(_) ->
               Error(MigrationError(
