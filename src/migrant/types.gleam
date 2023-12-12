@@ -1,5 +1,5 @@
-import gleam/map.{Map}
-import gleam/option.{Option}
+import gleam/dict.{type Dict}
+import gleam/option.{type Option}
 import simplifile
 import sqlight
 
@@ -18,4 +18,4 @@ pub type Migration {
 }
 
 pub type Migrations =
-  Map(String, Migration)
+  Dict(String, Migration)

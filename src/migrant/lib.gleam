@@ -1,13 +1,15 @@
-import gleam/map
+import gleam/dict
 import gleam/option.{None}
-import migrant/types.{Error, FilenameError, Migration, Migrations}
+import migrant/types.{
+  type Error, type Migration, type Migrations, FilenameError, Migration,
+}
 
 pub fn get_or_make_migration(
   name: String,
   migrations: Migrations,
   next: fn(Migration) -> Result(#(String, Migration), Error),
 ) -> Result(#(String, Migration), Error) {
-  case map.get(migrations, name) {
+  case dict.get(migrations, name) {
     Ok(migration) -> next(migration)
     Error(_) -> next(Migration(None, None))
   }

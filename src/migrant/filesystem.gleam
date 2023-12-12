@@ -1,9 +1,10 @@
 import gleam/io
 import gleam/string
-import gleam/map
-import gleam/option.{None, Option, Some}
+import gleam/dict
+import gleam/option.{type Option, None, Some}
 import migrant/types.{
-  Error, ExpectedFolderError, ExtractionError, FileError, Migration, Migrations,
+  type Error, type Migrations, ExpectedFolderError, ExtractionError, FileError,
+  Migration,
 }
 import migrant/lib
 import simplifile
@@ -16,7 +17,7 @@ pub fn load_migration_files(
   use migrations_dir <- is_directory(migrations_dir)
   use files <- list_files(migrations_dir)
 
-  case parse_files(migrations_dir, files, map.new()) {
+  case parse_files(migrations_dir, files, dict.new()) {
     Ok(migrations) -> next(migrations)
     Error(e) -> Error(e)
   }
@@ -30,7 +31,7 @@ fn is_directory(path: String, next: fn(String) -> Result(Nil, Error)) {
 }
 
 fn list_files(path: String, next: fn(List(String)) -> Result(Nil, Error)) {
-  case simplifile.list_contents(path) {
+  case simplifile.get_files(path) {
     Ok(files) -> next(files)
     Error(e) -> Error(FileError(e))
   }
@@ -81,7 +82,7 @@ fn parse_files(
 
       case res {
         Ok(#(name, migration)) -> {
-          let migrations = map.insert(migrations, name, migration)
+          let migrations = dict.insert(migrations, name, migration)
           parse_files(migrations_dir, rest, migrations)
         }
         Error(e) -> Error(e)

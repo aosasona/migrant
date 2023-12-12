@@ -1,13 +1,14 @@
 import gleam/io
 import gleam/dynamic
-import gleam/map
+import gleam/dict
 import gleam/list
 import gleam/string
 import gleam/int
 import gleam/result
 import gleam/option.{None, Some}
 import migrant/types.{
-  DatabaseError, Error, Migration, MigrationError, Migrations, RollbackError,
+  type Error, type Migration, type Migrations, DatabaseError, MigrationError,
+  RollbackError,
 }
 import sqlight
 
@@ -62,9 +63,9 @@ pub fn filter_applied_migrations(
   case query(db, sql, [], dynamic.element(0, dynamic.string)) {
     Ok(applied) ->
       migrations
-      |> map.drop(drop: applied)
+      |> dict.drop(drop: applied)
       |> fn(m: Migrations) {
-        let count = map.size(m)
+        let count = dict.size(m)
         case count {
           0 -> {
             io.println("-> No migrations to apply")
@@ -72,7 +73,7 @@ pub fn filter_applied_migrations(
           }
           _ -> {
             io.println(
-              "-> Found " <> int.to_string(map.size(m)) <> " " <> pluralise_migration(
+              "-> Found " <> int.to_string(dict.size(m)) <> " " <> pluralise_migration(
                 count,
               ) <> " to apply",
             )
@@ -217,7 +218,7 @@ fn mark_migration_as_applied(
 
 fn sort_migrations(migrations: Migrations) -> List(#(String, Migration)) {
   migrations
-  |> map.to_list
+  |> dict.to_list
   |> list.sort(fn(a, b) {
     let #(name_a, _) = a
     let #(name_b, _) = b

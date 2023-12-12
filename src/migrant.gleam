@@ -1,7 +1,7 @@
 import gleam/io
 import migrant/filesystem
 import migrant/database
-import migrant/types.{Error}
+import migrant/types.{type Error}
 import sqlight
 
 pub fn migrate(
