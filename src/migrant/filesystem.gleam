@@ -31,7 +31,7 @@ fn is_directory(path: String, next: fn(String) -> Result(Nil, Error)) {
 }
 
 fn list_files(path: String, next: fn(List(String)) -> Result(Nil, Error)) {
-  case simplifile.get_files(path) {
+  case simplifile.read_directory(path) {
     Ok(files) -> next(files)
     Error(e) -> Error(FileError(e))
   }
