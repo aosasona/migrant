@@ -73,9 +73,11 @@ pub fn filter_applied_migrations(
           }
           _ -> {
             io.println(
-              "-> Found " <> int.to_string(dict.size(m)) <> " " <> pluralise_migration(
-                count,
-              ) <> " to apply",
+              "-> Found "
+                <> int.to_string(dict.size(m))
+                <> " "
+                <> pluralise_migration(count)
+                <> " to apply",
             )
             next(m)
           }
@@ -150,7 +152,8 @@ fn apply(migration_tuple: #(String, Migration), db: sqlight.Connection) {
               case rollback(migration_tuple, db) {
                 Ok(_) ->
                   Error(MigrationError(
-                    "Rollback complete, failed to mark migration as applied: " <> name,
+                    "Rollback complete, failed to mark migration as applied: "
+                      <> name,
                     e,
                   ))
                 Error(e) -> {

@@ -75,7 +75,9 @@ fn parse_files(
         }
         _ -> {
           Error(ExtractionError(
-            "Failed to extract up/down from " <> file <> ". Migration files must be named in the format <name>.<up/down>.sql e.g 00001_create_users.up.sql",
+            "Failed to extract up/down from "
+              <> file
+              <> ". Migration files must be named in the format <name>.<up/down>.sql e.g 00001_create_users.up.sql",
           ))
         }
       }
