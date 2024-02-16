@@ -6,7 +6,7 @@ version = "0.2.0"
 #
 description = "[ALPHA] Database migrations for SQLite in Gleam"
 licences = ["Apache-2.0"]
-repository = { type = "github", user = "trulyao", repo = "migrant" }
+repository = { type = "github", user = "aosasona", repo = "migrant" }
 gleam = ">= 0.32.0"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
