@@ -1,22 +1,10 @@
 import gleam/io
-import migrant/filesystem
-import migrant/database
-import migrant/types.{type Error}
-import sqlight
+import migrant/config.{type Config, Config}
 
-pub fn migrate(
-  db: sqlight.Connection,
-  migration_dir: String,
-) -> Result(Nil, Error) {
-  use <- database.create_migrations_table(db)
-  use migrations <- filesystem.load_migration_files(migration_dir)
-  use migrations <- database.filter_applied_migrations(db, migrations)
+pub fn main() {
+  io.println("Hello from migrant!")
+}
 
-  case database.apply_migrations(db, migrations) {
-    Ok(_) -> Ok(Nil)
-    Error(err) -> {
-      io.debug(err)
-      panic as "Something went horribly wrong, see above for details."
-    }
-  }
+pub fn migrate(config: Config(_)) {
+  todo
 }
