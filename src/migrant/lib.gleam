@@ -22,6 +22,6 @@ pub fn validate_direction(
   case direction {
     "up" -> next("up")
     "down" -> next("down")
-    _ -> Error(FilenameError("Expected `up` or `down`"))
+    _ -> Error(FilenameError("Expected format <migraton_name>.<up/down>.sql"))
   }
 }

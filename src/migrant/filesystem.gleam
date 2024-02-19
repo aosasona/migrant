@@ -1,7 +1,9 @@
 import gleam/io
+import gleam/bool
 import gleam/string
 import gleam/dict
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import migrant/types.{
   type Error, type Migrations, ExpectedFolderError, ExtractionError, FileError,
   Migration,
@@ -24,26 +26,30 @@ pub fn load_migration_files(
 }
 
 fn is_directory(path: String, next: fn(String) -> Result(Nil, Error)) {
-  case simplifile.is_directory(path) {
-    True -> next(path)
-    False -> Error(ExpectedFolderError)
-  }
+  use <- bool.guard(when: simplifile.is_directory(path), return: next(path))
+  Error(ExpectedFolderError)
 }
 
 fn list_files(path: String, next: fn(List(String)) -> Result(Nil, Error)) {
-  case simplifile.read_directory(path) {
-    Ok(files) -> next(files)
-    Error(e) -> Error(FileError(e))
-  }
+  use files <- result.try(
+    simplifile.read_directory(path)
+    |> result.map_error(FileError),
+  )
+
+  next(files)
 }
 
 fn read_file(path: String, filename: String) -> Option(String) {
-  let filepath = case string.ends_with(path, "/") {
-    True -> path <> filename
-    False -> path <> "/" <> filename
+  let file_path = {
+    use <- bool.guard(
+      when: string.ends_with(path, "/"),
+      return: path <> filename,
+    )
+
+    path <> "/" <> filename
   }
 
-  case simplifile.read(filepath) {
+  case simplifile.read(file_path) {
     Ok(contents) -> Some(string.trim(contents))
     Error(_) -> None
   }
@@ -56,22 +62,29 @@ fn parse_files(
 ) -> Result(Migrations, Error) {
   case files {
     [] -> Ok(migrations)
+
     [file, ..rest] -> {
-      let res = case
-        file
-        |> string.split(".")
-      {
+      let res = case string.split(file, ".") {
         [name, direction, "sql"] -> {
           use direction <- lib.validate_direction(direction)
           use migration <- lib.get_or_make_migration(name, migrations)
           let sql = read_file(migrations_dir, file)
 
           let migration = case direction {
-            "up" -> Migration(..migration, up: sql)
-            "down" -> Migration(..migration, down: sql)
+            "up" -> Some(Migration(..migration, up: sql))
+            "down" -> Some(Migration(..migration, down: sql))
+            _ -> None
           }
 
-          Ok(#(name, migration))
+          case migration {
+            Some(m) -> Ok(#(name, m))
+            None ->
+              Error(ExtractionError(
+                "Invalid migration direction, expected one of `up` or `down`, got `"
+                  <> direction
+                  <> "`",
+              ))
+          }
         }
         _ -> {
           Error(ExtractionError(
