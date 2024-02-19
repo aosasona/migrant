@@ -1,17 +1,17 @@
 name = "migrant"
-version = "0.2.0"
+version = "0.2.1"
 
 # Fill out these fields if you intend to generate HTML documentation or publish
 # your project to the Hex package manager.
 #
-description = "[ALPHA] Database migrations for SQLite in Gleam"
+description = "Database migrations for SQLite in Gleam"
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "aosasona", repo = "migrant" }
 gleam = ">= 0.32.0"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
 [dependencies]
-gleam_stdlib = "~> 0.33"
+gleam_stdlib = "~> 0.33 or ~> 1.0"
 sqlight = "~> 0.9"
 simplifile = "~> 1.2"
 
