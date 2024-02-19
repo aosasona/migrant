@@ -16,7 +16,7 @@ pub fn migrate(
     Ok(_) -> Ok(Nil)
     Error(err) -> {
       io.debug(err)
-      panic as "Something went horribly wrong, see above for details."
+      panic as "Something went horribly wrong, see above for details. If you think this is a bug, please open an issue at https://github.com/aosasona/migrant"
     }
   }
 }
