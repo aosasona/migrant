@@ -26,7 +26,11 @@ pub fn load_migration_files(
 }
 
 fn is_directory(path: String, next: fn(String) -> Result(Nil, Error)) {
-  use <- bool.guard(when: simplifile.is_directory(path), return: next(path))
+  use is_dir <- result.try(
+    simplifile.verify_is_directory(path)
+    |> result.map_error(FileError),
+  )
+  use <- bool.guard(when: is_dir, return: next(path))
   Error(ExpectedFolderError)
 }
 
