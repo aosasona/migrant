@@ -31,3 +31,10 @@ pub type Config(a) {
 pub fn get_migrations_query() -> String {
   "SELECT name FROM " <> migrations_table <> "ORDER BY id, name ASC"
 }
+
+/// Returns the `create_migrations` DDL statement to be used by custom adapters
+pub fn create_migrations_table() -> String {
+  "CREATE TABLE "
+  <> migrations_table
+  <> " (id INT PRIMARY KEY AUTOINCREMENT, name VARCHAR(255) NOT NULL)"
+}

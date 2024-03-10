@@ -13,8 +13,8 @@ repository = { type = "github", user = "aosasona", repo = "migrant" }
 # https://gleam.run/writing-gleam/gleam-toml/.
 
 [dependencies]
-gleam_stdlib = "~> 0.34 or ~> 1.0"
-simplifile = "~> 1.4"
+gleam_stdlib = "~> 0.36 or ~> 1.0"
+simplifile = "~> 1.5"
 sqlight = "~> 0.9"
 filepath = "~> 1.0"
 
