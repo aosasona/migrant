@@ -27,12 +27,12 @@ pub type Config(a) {
   Config(adapter: Adapter(a), path: Path)
 }
 
-/// Returns the `get_migrations` DDL statement to be used by custom adapters
+/// Returns the `get_migrations` DDL statement to be used by custom adapters, and also used internally
 pub fn get_migrations_query() -> String {
   "SELECT name FROM " <> migrations_table <> "ORDER BY id, name ASC"
 }
 
-/// Returns the `create_migrations` DDL statement to be used by custom adapters
+/// Returns the `create_migrations` DDL statement to be used by custom adapters, also used internally
 pub fn create_migrations_table() -> String {
   "CREATE TABLE "
   <> migrations_table

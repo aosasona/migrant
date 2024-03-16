@@ -12,7 +12,7 @@ packages = [
 
 [requirements]
 filepath = { version = "~> 1.0" }
-gleam_stdlib = { version = "~> 0.36"}
+gleam_stdlib = { version = "~> 0.36 or ~> 1.0" }
 gleeunit = { version = "~> 1.0" }
 simplifile = { version = "~> 1.5" }
 sqlight = { version = "~> 0.9" }
