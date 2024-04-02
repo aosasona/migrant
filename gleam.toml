@@ -14,9 +14,11 @@ repository = { type = "github", user = "aosasona", repo = "migrant" }
 
 [dependencies]
 gleam_stdlib = "~> 0.36 or ~> 1.0"
-simplifile = "~> 1.5"
+simplifile = "~> 1.6"
 sqlight = "~> 0.9"
 filepath = "~> 1.0"
+argv = "~> 1.0"
+tom = "~> 0.3"
 
 [dev-dependencies]
 gleeunit = "~> 1.0"
