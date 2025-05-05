@@ -8,7 +8,6 @@ import gleam/result
 import gleam/option.{None, Some}
 import migrant/types.{
   type Error, type Migration, type Migrations, DatabaseError, MigrationError,
-  RollbackError,
 }
 import sqlight
 
@@ -140,16 +139,22 @@ fn apply(migration_tuple: #(String, Migration), db: sqlight.Connection) {
   case migration.up {
     Some(sql) -> {
       io.println("-> Applying migration: " <> name)
-      case exec(db, sql) {
+      case
+        exec(db, "BEGIN TRANSACTION")
+        |> result.then(fn(_) { exec(db, sql) })
+      {
         Ok(_) -> {
-          case mark_migration_as_applied(db, migration_tuple) {
+          case
+            mark_migration_as_applied(db, migration_tuple)
+            |> result.then(fn(_) { exec(db, "COMMIT TRANSACTION") })
+          {
             Ok(_) -> Ok(Nil)
             Error(e) -> {
               io.println("-> Failed to mark migration as applied: " <> name)
               io.debug(e)
               io.println("-> Rolling back migration: " <> name)
 
-              case rollback(migration_tuple, db) {
+              case exec(db, "ROLLBACK TRANSACTION") {
                 Ok(_) ->
                   Error(MigrationError(
                     "Rollback complete, failed to mark migration as applied: "
@@ -163,14 +168,12 @@ fn apply(migration_tuple: #(String, Migration), db: sqlight.Connection) {
               }
             }
           }
-          Ok(Nil)
         }
         Error(e) -> {
           io.println("-> Failed to apply migration: " <> name)
           io.debug(e)
           io.println("-> Rolling back migration: " <> name)
-
-          case rollback(migration_tuple, db) {
+          case exec(db, "ROLLBACK TRANSACTION") {
             Ok(_) ->
               Error(MigrationError(
                 "Rollback complete, failed to apply migration: " <> name,
@@ -184,24 +187,6 @@ fn apply(migration_tuple: #(String, Migration), db: sqlight.Connection) {
     None -> {
       io.println("-> Skipping migration: " <> name <> " no `up` query")
       Ok(Nil)
-    }
-  }
-}
-
-fn rollback(migration_tuple: #(String, Migration), db: sqlight.Connection) {
-  let #(name, migration) = migration_tuple
-  case migration.down {
-    Some(sql) -> {
-      case exec(db, sql) {
-        Ok(_) -> Ok(Nil)
-        Error(e) -> Error(e)
-      }
-    }
-    None -> {
-      Error(MigrationError(
-        "Unable to rollback migration: " <> name,
-        RollbackError,
-      ))
     }
   }
 }
