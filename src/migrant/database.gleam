@@ -1,11 +1,12 @@
-import gleam/io
-import gleam/dynamic
+import gleam/bool
 import gleam/dict
-import gleam/list
-import gleam/string
+import gleam/dynamic/decode
 import gleam/int
-import gleam/result
+import gleam/io
+import gleam/list
 import gleam/option.{None, Some}
+import gleam/result
+import gleam/string
 import migrant/types.{
   type Error, type Migration, type Migrations, DatabaseError, MigrationError,
   RollbackError,
@@ -25,7 +26,7 @@ pub fn query(
   db: sqlight.Connection,
   query sql: String,
   args args: List(sqlight.Value),
-  decoder decoder: dynamic.Decoder(a),
+  decoder decoder: decode.Decoder(a),
 ) -> QueryResult(a) {
   sqlight.query(sql, db, args, decoder)
   |> result.map_error(DatabaseError)
@@ -58,37 +59,65 @@ pub fn filter_applied_migrations(
   next: fn(Migrations) -> Result(Nil, Error),
 ) -> Result(Nil, Error) {
   io.println("-> Filtering applied migrations")
-  let sql = "SELECT name FROM __migrations ORDER BY id, name ASC;"
 
-  case query(db, sql, [], dynamic.element(0, dynamic.string)) {
-    Ok(applied) ->
-      migrations
-      |> dict.drop(drop: applied)
-      |> fn(m: Migrations) {
-        let count = dict.size(m)
-        case count {
-          0 -> {
-            io.println("-> No migrations to apply")
-            Ok(Nil)
-          }
-          _ -> {
-            io.println(
-              "-> Found "
-                <> int.to_string(dict.size(m))
-                <> " "
-                <> pluralise_migration(count)
-                <> " to apply",
-            )
-            next(m)
-          }
-        }
-      }
-    Error(e) -> {
-      io.debug(e)
-      io.println("-> Failed to filter applied migrations")
-      Error(e)
+  let decoder = decode.at([0], decode.string)
+
+  use applied <- result.try(
+    "SELECT name FROM __migrations ORDER BY id, name ASC;"
+    |> sqlight.query(db, [], decoder)
+    |> result.map_error(print_filter_error_message),
+  )
+
+  migrations
+  |> dict.drop(drop: applied)
+  |> print_count
+  |> fn(m) {
+    use <- bool.guard(when: m.1 == 0, return: Ok(Nil))
+    next(m.0)
+  }
+}
+
+fn print_count(m: Migrations) -> #(Migrations, Int) {
+  let count = dict.size(m)
+  case count {
+    0 -> {
+      io.println("-> No migrations to apply")
+      #(dict.new(), 0)
+    }
+    _ -> {
+      io.println(
+        "-> Found "
+        <> int.to_string(dict.size(m))
+        <> " "
+        <> pluralise_migration(count)
+        <> " to apply",
+      )
+      #(m, count)
     }
   }
+}
+
+fn print_filter_error_message(e: sqlight.Error) -> Error {
+  let message =
+    "-> Failed to query applied migrations: "
+    <> construct_sqlight_error_message(e)
+
+  io.println_error(message)
+  DatabaseError(e)
+}
+
+fn construct_sqlight_error_message(error: sqlight.Error) -> String {
+  let message = "\"" <> error.message <> "\""
+  let message = case error.offset {
+    -1 -> message
+    _ -> message <> " at offset " <> int.to_string(error.offset)
+  }
+
+  let code =
+    sqlight.error_code_to_int(error.code)
+    |> int.to_string
+
+  message <> " (CODE: " <> code <> ")"
 }
 
 fn pluralise_migration(count: Int) -> String {
