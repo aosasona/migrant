@@ -1,14 +1,14 @@
-import gleam/io
 import gleam/bool
-import gleam/string
 import gleam/dict
+import gleam/io
 import gleam/option.{type Option, None, Some}
 import gleam/result
+import gleam/string
+import migrant/lib
 import migrant/types.{
   type Error, type Migrations, ExpectedFolderError, ExtractionError, FileError,
   Migration,
 }
-import migrant/lib
 import simplifile
 
 pub fn load_migration_files(
@@ -27,7 +27,7 @@ pub fn load_migration_files(
 
 fn is_directory(path: String, next: fn(String) -> Result(Nil, Error)) {
   use is_dir <- result.try(
-    simplifile.verify_is_directory(path)
+    simplifile.is_directory(path)
     |> result.map_error(FileError),
   )
   use <- bool.guard(when: is_dir, return: next(path))
@@ -85,16 +85,16 @@ fn parse_files(
             None ->
               Error(ExtractionError(
                 "Invalid migration direction, expected one of `up` or `down`, got `"
-                  <> direction
-                  <> "`",
+                <> direction
+                <> "`",
               ))
           }
         }
         _ -> {
           Error(ExtractionError(
             "Failed to extract up/down from "
-              <> file
-              <> ". Migration files must be named in the format <name>.<up/down>.sql e.g 00001_create_users.up.sql",
+            <> file
+            <> ". Migration files must be named in the format <name>.<up/down>.sql e.g 00001_create_users.up.sql",
           ))
         }
       }
