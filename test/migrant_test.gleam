@@ -33,7 +33,7 @@ fn priv_dir() -> String {
   case erlang.priv_directory("migrant") {
     Ok(dir) -> dir
     Error(e) -> {
-      io.debug(e)
+      echo e
       panic as "^^ Failed to get priv directory ^^"
     }
   }
@@ -47,15 +47,15 @@ fn db_path() -> String {
   priv_dir() <> "/test.db"
 }
 
-fn setup() -> Nil {
+fn setup(t: MigrationType) -> Nil {
   // Create the priv directory if it doesn't exist
   let _ = simplifile.create_directory(priv_dir())
 
   // Create the db file if it doesn't exist
-  let is_file = case simplifile.verify_is_file(db_path()) {
+  let is_file = case simplifile.is_file(db_path()) {
     Ok(is_file) -> is_file
     Error(e) -> {
-      io.debug(e)
+      echo e
       panic as "^^ Failed to check for existence of db file ^^"
     }
   }

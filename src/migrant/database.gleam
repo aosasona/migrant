@@ -241,8 +241,9 @@ fn mark_migration_as_applied(
 ) -> Result(Nil, Error) {
   let #(name, _) = migration_tuple
   let sql = "INSERT INTO __migrations (name) VALUES (?) returning id;"
+  let decoder = decode.at([0], decode.int)
 
-  case query(db, sql, [sqlight.text(name)], dynamic.element(0, dynamic.int)) {
+  case query(db, sql, [sqlight.text(name)], decoder) {
     Ok(_) -> Ok(Nil)
     Error(e) -> Error(e)
   }
