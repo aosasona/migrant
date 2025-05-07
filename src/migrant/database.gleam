@@ -175,7 +175,7 @@ fn apply(
 ) -> Result(Nil, Error) {
   let #(name, migration) = migration_tuple
 
-  use <- bool.guard(when: option.is_none(migration.up), return: {
+  use <- bool.lazy_guard(when: option.is_none(migration.up), return: fn() {
     io.println("-> Skipping migration: " <> name <> " no `up` query")
     Ok(Nil)
   })
@@ -213,14 +213,14 @@ fn apply(
   }
 
   // If the migration was successful, return
-  use <- bool.guard(when: result.is_ok(res), return: {
+  use <- bool.lazy_guard(when: result.is_ok(res), return: fn() {
     io.println("-> Migration applied successfully: " <> name)
     Ok(Nil)
   })
 
   // If the migration failed and we don't have a down query, rollback the transaction
   let assert Error(err) = res
-  use <- bool.guard(when: option.is_none(migration.down), return: {
+  use <- bool.lazy_guard(when: option.is_none(migration.down), return: fn() {
     err
     |> rollback_with_transaction(db, _)
   })
