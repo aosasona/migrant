@@ -164,7 +164,13 @@ fn run_migration(
 fn with_err_message(e, msg: String) {
   e
   |> result.map_error(fn(e) {
-    io.println("-> " <> msg)
+    let message = case e {
+      types.DatabaseError(sqlight_error) ->
+        msg <> ": " <> construct_sqlight_error_message(sqlight_error)
+      _ -> msg
+    }
+
+    io.println("-> " <> message)
     e
   })
 }
@@ -193,13 +199,15 @@ fn apply(
     // Execute the migration
     use _ <- result.try(
       exec(db, migration.up |> option.unwrap(""))
-      |> with_err_message("Failed to apply migration: " <> name),
+      |> with_err_message("Failed to apply migration `" <> name <> "`"),
     )
 
     // Attempt to mark the migration as applied
     use _ <- result.try(
       mark_migration_as_applied(db, migration_tuple)
-      |> with_err_message("Failed to mark migration as applied: " <> name),
+      |> with_err_message(
+        "Failed to mark migration as applied `" <> name <> "`",
+      ),
     )
 
     // Attempt to commit the transaction
@@ -234,7 +242,7 @@ fn apply(
       db,
       _,
     )
-    |> with_err_message("Failed to rollback migration: " <> name),
+    |> with_err_message("Failed to rollback migration `" <> name <> "`"),
   )
 
   Ok(Nil)
