@@ -10,7 +10,7 @@ pub type Error {
   ExtractionError(message: String)
   DatabaseError(sqlight.Error)
   MigrationError(message: String, err: Error)
-  RollbackError
+  RollbackError(message: String, err: Error)
 }
 
 pub type Migration {

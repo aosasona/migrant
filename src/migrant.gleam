@@ -1,6 +1,7 @@
 import gleam/io
-import migrant/filesystem
+import gleam/result
 import migrant/database
+import migrant/filesystem
 import migrant/types.{type Error}
 import sqlight
 
@@ -12,11 +13,9 @@ pub fn migrate(
   use migrations <- filesystem.load_migration_files(migration_dir)
   use migrations <- database.filter_applied_migrations(db, migrations)
 
-  case database.apply_migrations(db, migrations) {
-    Ok(_) -> Ok(Nil)
-    Error(err) -> {
-      io.debug(err)
-      panic as "Something went horribly wrong, see above for details. If you think this is a bug, please open an issue at https://github.com/aosasona/migrant"
-    }
-  }
+  database.apply_migrations(db, migrations)
+  |> result.map(fn(_) {
+    io.println("-> Migrations applied successfully")
+    Nil
+  })
 }
