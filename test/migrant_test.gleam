@@ -1,5 +1,5 @@
 import gleam/dynamic/decode
-import gleam/erlang
+import gleam/erlang/application.{priv_directory}
 import gleam/result
 import gleeunit
 import gleeunit/should
@@ -90,7 +90,7 @@ pub fn bad_migration_test() {
 }
 
 fn priv_dir() -> String {
-  case erlang.priv_directory("migrant") {
+  case priv_directory("migrant") {
     Ok(dir) -> dir
     Error(e) -> {
       echo e
